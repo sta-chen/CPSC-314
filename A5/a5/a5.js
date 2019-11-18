@@ -75,7 +75,7 @@ negyTexture = textureLoader.load( "images/negy.jpg" );
 negzTexture = textureLoader.load( "images/negz.jpg" ); 
 
 minFilter = THREE.NearestFilter;
-// minFilter = THREE.LinearMipMapLinearFilter;
+minFilter = THREE.LinearMipMapLinearFilter;
 magFilter = THREE.LinearFilter;
 
 posxTexture.magFilter = magFilter;
@@ -137,8 +137,8 @@ floorTexture.magFilter = THREE.NearestFilter;
 floorTexture.minFilter = THREE.NearestFilter;
 floorNormalTexture.minFilter = THREE.NearestFilter;
 floorNormalTexture.magFilter = THREE.NearestFilter;
-// floorTexture.minFilter = THREE.LinearMipMapLinearFilter;
-// floorNormalTexture.minFilter = THREE.LinearMipMapLinearFilter;
+floorTexture.minFilter = THREE.LinearMipMapLinearFilter;
+floorNormalTexture.minFilter = THREE.LinearMipMapLinearFilter;
 var floorMaterial = new THREE.ShaderMaterial( {
         uniforms: { 
            lightPosition: {value: new THREE.Vector3(0.0,0.0,-1.0) },
