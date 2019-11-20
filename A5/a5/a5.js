@@ -67,12 +67,15 @@ var textureLoader = new THREE.TextureLoader();
 ////////////////////// ENVMAP SHADER (and SkyBox textures)  /////////////////////////////
 
 // posxTexture = textureLoader.load( "images/ABCD.jpg" );   // useful for debugging
-posxTexture = textureLoader.load( "images/posx.jpg" ); 
-posyTexture = textureLoader.load( "images/posy.jpg" ); 
-poszTexture = textureLoader.load( "images/posz.jpg" ); 
-negxTexture = textureLoader.load( "images/negx.jpg" ); 
-negyTexture = textureLoader.load( "images/negy.jpg" ); 
-negzTexture = textureLoader.load( "images/negz.jpg" ); 
+posxTexture = textureLoader.load( "images/posx.jpg" );
+// posyTexture = textureLoader.load( "images/ABCD.jpg" );
+// posyTexture = textureLoader.load( "images/ABCD.jpg" );
+posyTexture = textureLoader.load( "images/posy.jpg" );
+poszTexture = textureLoader.load( "images/posz.jpg" );
+negxTexture = textureLoader.load( "images/negx.jpg" );
+// negyTexture = textureLoader.load( "images/ABCD.jpg" );
+negyTexture = textureLoader.load( "images/negy.jpg" );
+negzTexture = textureLoader.load( "images/negz.jpg" );
 
 minFilter = THREE.NearestFilter;
 minFilter = THREE.LinearMipMapLinearFilter;
@@ -164,14 +167,13 @@ var worldFrame = new THREE.AxesHelper(5) ;
 scene.add(worldFrame);
 
 /////////////////////////////////////	
-// Skybox 
-/////////////////////////////////////	
-
+// Skybox (b)
+/////////////////////////////////////
 // TO DO: 
 //  - add the other skybox faces:  negx, negy, posy, negz, posz
 //  - after debugging, change size to 1000
 
-var size = 10;
+var size = 1000;
 wallGeometry = new THREE.PlaneBufferGeometry(2*size, 2*size);
 
 posxMaterial = new THREE.MeshBasicMaterial( {map: posxTexture, side:THREE.DoubleSide });
@@ -179,6 +181,38 @@ posxWall = new THREE.Mesh(wallGeometry, posxMaterial);
 posxWall.position.x = size;
 posxWall.rotation.y = -Math.PI / 2;
 scene.add(posxWall);
+
+negxMaterial = new THREE.MeshBasicMaterial({map: negxTexture, side: THREE.DoubleSide});
+negxWall = new THREE.Mesh(wallGeometry, negxMaterial);
+negxWall.position.x = -size;
+negxWall.rotation.y = Math.PI / 2;
+scene.add(negxWall);
+
+poszMaterial = new THREE.MeshBasicMaterial({map: poszTexture, side: THREE.DoubleSide});
+poszWall = new THREE.Mesh(wallGeometry, poszMaterial);
+poszWall.position.z = size;
+poszWall.rotation.y = Math.PI;
+scene.add(poszWall);
+
+negzMaterial = new THREE.MeshBasicMaterial({map: negzTexture, side: THREE.DoubleSide});
+negzWall = new THREE.Mesh(wallGeometry, negzMaterial);
+negzWall.position.z = -size;
+scene.add(negzWall);
+
+posyMaterial = new THREE.MeshBasicMaterial({map: posyTexture, side: THREE.DoubleSide});
+posyWall = new THREE.Mesh(wallGeometry, posyMaterial);
+posyWall.position.y = size;
+posyWall.rotation.x = Math.PI / 2;
+posyWall.rotation.z = Math.PI;
+scene.add(posyWall);
+
+negyMaterial = new THREE.MeshBasicMaterial({map: negyTexture, side: THREE.DoubleSide});
+negyWall = new THREE.Mesh(wallGeometry, negyMaterial);
+negyWall.position.y = -size;
+negyWall.rotation.x = -Math.PI /2;
+negyWall.rotation.z = -Math.PI;
+scene.add(negyWall);
+
 
 /////////////////////////////////////	
 // FLOOR:  texture-map  &  normal-map
