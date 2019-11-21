@@ -61,6 +61,7 @@ void main()
 </script>
 
 <script id="holeyFragShader" type="x-shader/x-fragment">
+// (d)
 uniform vec3 lightPosition;
 uniform vec3 myColor;
 varying vec3 vcsNormal;
@@ -68,17 +69,42 @@ varying vec3 vcsPosition;
 varying vec3 ocsPosition;
 
 void main( void ) {
+  vec3 L = normalize(lightPosition - vcsPosition);
+  vec3 N = normalize(vcsNormal);
+  float i = dot(N,L);
+  float scaler = 4.0;
 
-  vec3 color = vec3(0,1,1);
-  gl_FragColor = vec4(color,1.0);
+  float x = ocsPosition.x;
+  float y = ocsPosition.y;
+  float z = ocsPosition.z;
+  float dx = x*scaler - floor(x*scaler+0.5);
+  float dy = y*scaler - floor(y*scaler+0.5);
+  float dz = z*scaler - floor(z*scaler+0.5);
+  float r2 = dx*dx + dy*dy + dz*dz;
+  if (r2 <= 0.15) {
+    discard;
+  } else {
+    gl_FragColor = vec4(i*myColor, 1.0);
+  }
+  //vec3 color = vec3(0,1,1);
+  //gl_FragColor = vec4(color,1.0);
 }
 </script>
 
 <script id="toonFragShader" type="x-shader/x-fragment">
+// (c)
 varying vec3 vcsNormal;
 varying vec3 vcsPosition;
+uniform vec3 lightPosition;
+uniform vec3 myColor;
 void main( void ) {
-  gl_FragColor = vec4(0.9,0.9,0.3,1.0);   // default is yellow
+  vec3 L = normalize(lightPosition - vcsPosition);
+  vec3 N = normalize(vcsNormal);
+
+  float i = dot(N,L);
+  i = floor(4.0*i) / 4.0;
+  //gl_FragColor = vec4(0.9,0.9,0.3,1.0);   // default is yellow
+  gl_FragColor = vec4(myColor*i,1.0);
 }
 </script>
 
@@ -86,6 +112,7 @@ void main( void ) {
 
 
 <script id="envmapFragShader" type="x-shader/x-fragment">
+// (f) (g)
 uniform vec3 lightPosition;
 uniform sampler2D uPosxTexture;
 uniform sampler2D uPosyTexture;
@@ -99,13 +126,55 @@ varying vec3 vcsNormal;
 varying vec3 ocsPosition;
 varying vec3 vcsPosition;
 void main( void ) {
-
+  vec3 I = normalize(vcsPosition);
   vec3 N = normalize(vcsNormal);
-  gl_FragColor = vec4(N,1.0);
+  vec3 R = reflect(I,N);
+  vec4 newvec = vec4(R,1.0)*matrixWorld;
+
+  if (newvec.y >= 0.0 && newvec.y >= abs(newvec.x) && newvec.y >= abs(newvec.z)) {
+    float u = ((-newvec.x / newvec.y) + 1.0) / 2.0;
+    float v = ((-newvec.z / newvec.y) + 1.0) / 2.0;
+    vec3 color = texture2D(uPosyTexture, vec2(u,v)).xyz;
+    gl_FragColor = vec4(color, 1.0);
+  }
+  if (newvec.y < 0.0 && abs(newvec.y) >= abs(newvec.x) && abs(newvec.y) >= abs(newvec.z)) {
+    float u = ((-newvec.x / newvec.y) + 1.0) / 2.0;
+    float v = ((newvec.z / newvec.y) + 1.0) / 2.0;
+    vec3 color = texture2D(uNegyTexture, vec2(u,v)).xyz;
+    gl_FragColor = vec4(color, 1.0);
+  }
+  if (newvec.x >= 0.0 && newvec.x >= abs(newvec.y) && newvec.x >= abs(newvec.z)) {
+    float u = ((newvec.z / newvec.x) + 1.0) / 2.0;
+    float v = ((newvec.y / newvec.x) + 1.0) / 2.0;
+    vec3 color = texture2D(uPosxTexture, vec2(u,v)).xyz;
+    gl_FragColor = vec4(color, 1.0);
+  }
+  if (newvec.x < 0.0 && abs(newvec.x) >= abs(newvec.y) && abs(newvec.x) >= abs(newvec.z)) {
+    float u = ((newvec.z / newvec.x) + 1.0) / 2.0;
+    float v = ((-newvec.y / newvec.x) + 1.0) / 2.0;
+    vec3 color = texture2D(uNegxTexture, vec2(u,v)).xyz;
+    gl_FragColor = vec4(color, 1.0);
+  }
+  if (newvec.z >= 0.0 && newvec.z >= abs(newvec.x) && newvec.z >= abs(newvec.y)) {
+    float u = ((-newvec.x / newvec.z) + 1.0) / 2.0;
+    float v = ((newvec.y / newvec.z) + 1.0) / 2.0;
+    vec3 color = texture2D(uPoszTexture, vec2(u,v)).xyz;
+    gl_FragColor = vec4(color, 1.0);
+  }
+  if (newvec.z < 0.0 && abs(newvec.z) >= abs(newvec.x) && abs(newvec.z) >= abs(newvec.y)) {
+    float u = ((-newvec.x / newvec.z) + 1.0) / 2.0;
+    float v = ((-newvec.y / newvec.z) + 1.0) / 2.0;
+    vec3 color = texture2D(uNegzTexture, vec2(u,v)).xyz;
+    gl_FragColor = vec4(color, 1.0);
+  }
+
+  //vec3 N = normalize(vcsNormal);
+  //gl_FragColor = vec4(N,1.0);
 }
 </script>
 
 <script id="floorFragShader" type="x-shader/x-fragment">
+// (e)
 uniform vec3 lightPosition;
 uniform vec3 myColor;
 varying vec3 vcsPosition;
@@ -116,7 +185,24 @@ varying vec2 vUv;
 
 void main( void ) {
   vec3 color = texture2D(textureMap, vUv).xyz;
-  gl_FragColor = vec4(color,1.0);
+  vec3 normalColor = texture2D(normalMap, vUv).xyz;
+
+  float Nx = 2.0*normalColor.x - 1.0;
+  float Ny = 2.0*normalColor.y - 1.0;
+  float Nz = 2.0*normalColor.z - 1.0;
+
+  vec3 temp = vec3(Nx, Ny, Nz);
+  vec3 N = normalize(temp);
+  mat3 rotation = mat3(1.0,0.0,0.0,
+                       0.0,0.0,-1.0,
+                       0.0,1.0,0.0);
+  N = rotation*N;
+  vec3 L = normalize(lightPosition - vcsPosition);
+  float i = dot(N,L);
+
+
+  //gl_FragColor = vec4(normalColor,1.0);
+  gl_FragColor = vec4(i*color,1.0);
 }
 </script>
 
@@ -169,10 +255,17 @@ float pNoise(vec2 p, int res){
 varying vec3 ocsPosition;
 varying vec3 vcsPosition;
 void main( void ) {
-  int levels = 1;
+  int levels = 2;
+  // int levels = 5;
   float i=pNoise(vcsPosition.xy,levels);
-  gl_FragColor = vec4(i,i,i,1.0);
+  // float i=pNoise(ocsPosition.xy,levels);
+  float j = floor(i + 0.9);
+  gl_FragColor = vec4(j,j,0.3,1.0);
+  // gl_FragColor = vec4(i,i,i,1.0);
 }
+/* 1. changed to ocsPosition: the noise is static when the scene is rotated (when using vcsPosition,
+      the noise will change as we rotate the scene
+   2. increasing the level: the boundary of yellow part is less smooth than using smaller level */
 </script>
 
 <script src="a5.js"></script>
