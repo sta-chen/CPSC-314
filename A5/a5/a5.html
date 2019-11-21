@@ -267,6 +267,25 @@ void main( void ) {
       the noise will change as we rotate the scene
    2. increasing the level: the boundary of yellow part is less smooth than using smaller level */
 </script>
+    <script id="myFragShader" type="x-shader/x-fragment">
+      varying vec3 vcsNormal;
+      varying vec3 vcsPosition;
+      varying vec3 ocsPosition;
+      uniform vec3 lightPosition;
+      uniform vec3 myColor;
+      void main( void ) {
+        vec3 L = normalize(lightPosition - vcsPosition);
+        vec3 N = normalize(vcsNormal);
+
+        float i = dot(N,L);
+
+        //gl_FragColor = vec4(0.9,0.9,0.3,1.0);   // default is yellow
+        if (ocsPosition.x * ocsPosition.x + ocsPosition.z * ocsPosition.z >= 1.0){
+        gl_FragColor = vec4(myColor*i,1.0);} else {
+
+        gl_FragColor = i*vec4(0.9,0.9,0.3,1.0);}
+      }
+    </script>
 
 <script src="a5.js"></script>
 </body>
