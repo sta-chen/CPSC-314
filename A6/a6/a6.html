@@ -244,7 +244,7 @@ vec3 rayCast(ray myRay)             // return color
         vec3 I = myRay.direction;
         vec3 localColor;
         if (nearestSphere.isLight == true) {
-          localColor = localShade(P, -N, I, nearestSphere.mtrl.color);
+          localColor = nearestSphere.mtrl.color;
         } else {
           localColor = localShade(P, N, I, nearestSphere.mtrl.color);
         }
